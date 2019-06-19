@@ -1,0 +1,94 @@
+import React, { Component } from 'react';
+import styled from 'styled-components';
+import * as CONSTANTS from './constants.js';
+
+import ScheduleOptions from './ScheduleOptions.js';
+import ScheduleDayColumn from './ScheduleDayColumn.js';
+import HourLabel from './HourLabel.js';
+
+const StyledSchedule = styled.div`
+  padding-top: 1rem;
+
+  & > :first-child {
+  	text-align: right;
+  	font-weight: bold;
+  	text-transform: uppercase;
+  }
+
+  & > :first-child > :first-child {
+    background: var(--background-color);
+    height: 2rem;
+    line-height: 2rem;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+`;
+
+const StyledLeft = styled.div`
+  position: relative;
+  text-align: center;
+  color: ${props => props.color};
+  display: ${props => props.hide ? 'none' : 'block'};
+
+  @media (min-width: 576px) {
+  	text-align: right;
+    display: block;
+  }
+`;
+
+class Schedule extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+      channel: props.channel
+		}
+		this.setChannel = this.setChannel.bind(this);
+	}
+
+  setChannel(channel) {
+    if (channel !== this.state.channel) {
+      this.setState({
+        channel: channel
+      });
+    }
+
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <ScheduleOptions
+          channel={this.state.channel}
+          onClickChannel={this.setChannel}
+        />
+        <StyledSchedule className="row">
+          <div className="col-sm">
+	          <StyledLeft color={'var(--wmuc-red)'} hide={false}>
+	            {CONSTANTS.STREAM_INFO[this.state.channel].name}
+	          </StyledLeft>
+            {
+              [...Array(24).keys()].map(
+                (i) =>
+                <StyledLeft color={'var(--color)'} hide={true}>
+                  <HourLabel hour={i} />
+                </StyledLeft>
+              )
+            }
+          </div>
+	        {CONSTANTS.SCHEDULE[this.state.channel].map(
+	        	(day, index) =>
+	        	<ScheduleDayColumn
+	        	  key={index}
+	        	  index={index}
+	        	  shows={day}
+	        	/>
+	        )}
+        </StyledSchedule>
+      </React.Fragment>
+    );
+  }
+}
+
+export default Schedule;

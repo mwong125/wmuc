@@ -1,0 +1,48 @@
+import React from 'react';
+import styled from 'styled-components';
+
+import * as CONSTANTS from './constants.js';
+
+import Icon from './Icon.js';
+
+const Info = styled.a`
+  &, &:hover {
+    color: var(${props => props.isOn ? '--on' : '--off'});
+    text-decoration: none;
+  }
+
+  &::before {
+    content: '';
+    padding: 0 .4rem 0 .4rem;
+  }
+
+  & i {
+    padding-right: .1em;
+  }
+
+  @media (min-width: 576px) {
+    &::before {
+      content: '/';
+      padding: 0 .4rem 0 .4rem;
+    }
+  }
+`;
+
+function StreamInfo(props) {
+  let phone = CONSTANTS.STREAM_INFO[props.channel].phone;
+  return (
+    <React.Fragment>
+      <Info href="#" isOn={props.isOn}>
+        {props.show}
+      </Info>
+      <Info href="#"  isOn={props.isOn}>
+        <Icon i="headphones" /> {props.djs}
+      </Info>
+      <Info href={"tel:" + phone} isOn={props.isOn}>
+        <Icon i="phone" /> {phone}
+      </Info>
+    </React.Fragment>
+  );
+}
+
+export default StreamInfo;

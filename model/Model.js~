@@ -1,0 +1,242 @@
+
+const header = require('../database/header.js');
+const mysql = require("mysql");
+
+const Days = Object.freeze({
+    SUNDAY: Symbol("Sunday"),
+    MONDAY: Symbol("Monday"),
+    TUESDAY: Symbol("Tuesday"),
+    WEDNESDAY: Symbol("Wednesday"),
+    THURSDAY: Symbol("Thursday"),
+    FRIDAY: Symbol("Friday"),
+    SATURDAY: Symbol("Saturday"),
+});   
+
+class Show {
+    constructor(show_name,
+		show_djs,
+		show_description,
+		show_genre,
+		show_day,
+		show_start_hour,
+		show_duration,
+		show_id
+	       ) {
+	this._show_name = show_name;
+	this._show_djs = new Array();
+	show_djs.map(dj => this._show_djs.push(dj));
+	this._show_description = show_description;
+	this._show_genre = show_genre;
+	this._show_day = show_day;
+	this._show_start_hour = show_start_hour;
+	this._show_duration = show_duration;
+	this._show_id = show_id;
+    }
+    toString() {
+	return this._show_name+"-"+this._show_time;
+    }
+    get show_name() {
+	return this._show_name;
+    }
+    set show_name(show_name) {
+	this._show_name = show_name;
+    }
+    get show_djs() {
+	return this._show_djs;
+    }
+    set show_djs(show_djs) {
+	this._show_djs = show_djs;
+    }
+    get show_description() {
+	return this._show_descriptions;
+    }
+    set show_description(show_description) {
+	this._show_description = show_description;
+    }
+    get show_genre() {
+	return this._show_genre;
+    }
+    set show_genre(show_genre) {
+	this._show_genre = show_genre;
+    }
+    get show_day() {
+	return this._show_day;
+    }
+    set show_day(show_day) {
+	this._show_day = show_day;
+    }
+    get show_start_hour() {
+	return this._show_start_hour;
+    }
+    set show_start_hour(show_start_hour) {
+	this._show_start_hour = show_start_hour;
+    }
+    get show_duration() {
+	return this._show_duration;
+    }
+    set show_duration(show_duration) {
+	this._show_duration = show_duration;
+    }
+    get show_id() {
+	return this._show_id;
+    }
+    set show_id(show_id) {
+	this._show_id = show_id;
+    }
+}
+
+class User {
+    constructor(user_name, user_pass, user_pic) {
+	this._user_name = user_name;
+	this._user_pass = user_pass;
+	this._user_pic = user_pic;
+    }
+    toString() {
+	return "(Username,Userpass): ("+this._user_name+","+this._user_pass+")";
+    }
+    get user_name() {
+	return this._user_name;
+    }
+    set user_name(user_name) {
+	this._user_name = user_name;
+    }
+    get user_pass() {
+	return this._user_pass;
+    }
+    set user_pass(user_pass) {
+	this._user_pass = user_pass;
+    }
+    get user_pic() {
+	return this._user_pic;
+    }
+    set user_pic(user_pic) {
+	this._user_pic = user_pic;
+    }
+}
+
+class DJ extends User {
+    constructor(user_name, user_pass, user_pic) {
+	super(user_name, user_pass, user_pic);
+	this._user_bio = "";
+	this._user_shows = new Array();
+    }
+    toString() {
+	let str =  "(Username,Userpass,Shows:[]): ("+this._user_name+","+this._user_pass;
+	this.user_shows.map(show => str += ","+show.toString());
+	return str + ")";
+    }
+    get user_bio() {
+	return this._user_bio;
+    }
+    set user_bio(user_bio) {
+	this._user_bio = user_bio;
+    }
+    get user_shows() {
+	return this.user_shows;
+    }
+    set user_shows(user_shows) {
+	this._user_shows = user_shows;
+    }
+    addShow(show) {
+	this._user_shows.push(show);
+	return this;
+    }
+    delShow(show_name) {
+	let index  = 0;
+	for (var show of this._user_shows) {
+	    if (show._show_name == show_name) {
+		break;
+	    }
+	    index++;
+	}
+	if (index != this._user_shows.length) {
+	    this._user_shows.splice(index, 1);
+	}
+	return this;
+    }
+}
+
+class Schedule {
+    
+    constructor(schedule_json, transform=true) {
+	this._schedule_json = schedule_json;
+	this._dg_shows = new Array(7).fill().map(() => new Array(0).fill(0));
+	this._fm_shows = new Array(7).fill().map(() => new Array(0).fill(0));
+	if (transform) {
+	    Schedule.jsonToObj(schedule_json, this._dg_shows, this._fm_shows);
+	}
+    }
+    get dg_shows() {
+	return this._dg_shows;
+    }
+    get fm_shows() {
+	return this._fm_shows;
+    }
+    
+    static jsonToObj(schedule_json, shows_dig, shows_fm) {
+	var day_count = 0;
+	schedule_json['fm'].map(function(day) {
+	    let show_day = Schedule.getDay(day_count);
+	    day.map(show => shows_fm[day_count].push(new Show(show['name'],
+							      show['dj'],
+							      show['description'],
+							      show['genres'],
+							      show_day,
+							      show['start_hour'],
+							      show['duration'],
+							      show['show_id']
+							     )));
+	    day_count++;
+	});
+	day_count = 0;
+	schedule_json['digital'].map(function(day) {
+	    let show_day = Schedule.getDay(day_count);
+	    day.map(show => shows_dig[day_count].push(new Show(show['name'],
+							       show['dj'],
+							       show['description'],
+							       show['genres'],
+							       show_day,
+							       show['start_hour'],
+							       show['duration'],
+							       show['show_id']
+							      )));
+	    day_count++;
+	});
+    }
+    
+    static objToSQL() {
+	var dbInfo = header.sqlInfo;
+	var connection = mysql.createConection(dbInfo);
+    }
+    static getDay(day_count) {
+	var day;
+	switch (day_count) {
+	case 0:
+	    day = Days.SUNDAY;
+	    break;
+	case 1:
+	    day = Days.MONDAY;
+	    break
+	case 2:
+	    day = Days.TUESDAY;
+	    break;
+	case 3:
+	    day = Days.WEDNESDAY;
+	    break;
+	case 4:
+	    day = Days.THURSDAY;
+	    break;
+	case 5:
+	    day = Days.FRIDAY;
+	    break;
+	case 6:
+	    day = Days.SATURDAY;
+	    break;
+	}
+	return day;
+    }
+}
+
+module.exports = {
+    Schedule: Schedule
+};

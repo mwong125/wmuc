@@ -1,0 +1,39 @@
+/*middleware and server*/
+const express = require('express');
+const bodyParser = require('body-parser');
+
+/*app model*/
+const Model = require('./model/Model.js');
+
+/* server-side schedule information
+   eventually the schedule object itself will be stored in the db
+   for now the schedule is loaded from the static json object file
+   and stored in server memory */
+const schedule_json = require('./model/schedule_data.js').schedule;
+appSchedule = new Model.Schedule(schedule_json, true);
+
+const app = express();
+app.use(express.static('static'));
+app.use(bodyParser.json());
+
+dummyLogin = {
+    valid_user: "mikey",
+    valid_pass: "yekim"
+}
+
+/* routing api */
+app.get('/api/schedule', function(req, res) {
+    console.log("received schedule request");
+    var returnObj;
+    returnObj = { schedule_fm: appSchedule.fm_shows, schedule_dg: appSchedule.dg_shows };
+    res.json(returnObj);
+});
+
+app.post('/api/login', function(req, res) {
+    console.log("recevied login request");
+    var resLoginObj;
+});
+
+app.listen(3000, function() {
+    console.log('App started');
+});

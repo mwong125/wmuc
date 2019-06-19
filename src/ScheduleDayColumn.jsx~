@@ -1,0 +1,89 @@
+import React from 'react';
+import styled from 'styled-components';
+
+import ScheduleShow from './ScheduleShow.js';
+
+const StyledScheduleDayColumn = styled.div`
+  padding: 0;
+
+  @media (min-width: 576px) {
+    background: ${props => props.background};
+    border-left: 1px solid var(--background-color);
+    border-right: 1px solid var(--background-color);
+  }
+`;
+
+const StyledDay = styled.div`
+  background: var(--background-color);
+  text-transform: uppercase;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  height: 2rem;
+  line-height: 2rem;
+  user-select: none;
+  position: -webkit-sticky;
+  position: sticky;
+  z-index: 1;
+  top: 0;
+
+  #sun::after,
+  #mon::after,
+  #tues::after,
+  #thurs::after,
+  #fri::after {
+  	content: 'day';
+  }
+
+  #wed::after {
+  	content: 'nesday';
+  }
+
+  #sat::after {
+  	content: 'urday';
+  }
+
+  @media (min-width: 576px) {
+  	background: ${props => props.background};
+  }
+
+  @media (min-width: 576px) and (max-width: 992px) {
+    #sun::after,
+    #mon::after,
+    #tues::after,
+    #wed::after,
+    #thurs::after,
+    #fri::after,
+    #sat::after {
+      content: '';
+    }
+  }
+`;
+
+let days = ['sun', 'mon', 'tues', 'wed', 'thurs', 'fri', 'sat'];
+
+function ScheduleDayColumn(props) {
+  let background = props.index % 2 === 0 ? 'var(--wmuc-gray)' : 'var(--wmuc-gray2)';
+  return (
+    <StyledScheduleDayColumn className="col-sm" background={background}>
+      <StyledDay background={background}>
+        <span id={days[props.index]}>{days[props.index]}</span>
+      </StyledDay>
+      {props.shows.map(
+        (show) =>
+        <ScheduleShow
+          key={show.show_id}
+          show_id={show.show_id}
+          name={show.name}
+          djs={show.dj}
+          description={show.description}
+          start_date={show.start_hour}
+          duration={show.duration}
+          background={background}
+        />
+      )}
+    </StyledScheduleDayColumn>
+  );
+}
+
+export default ScheduleDayColumn;

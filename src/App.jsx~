@@ -1,0 +1,32 @@
+import React from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import styled from 'styled-components';
+
+import './App.css';
+
+import Nav from './Nav.js';
+import NavStream from './NavStream.js';
+import HomePage from './HomePage.js';
+import Schedule from './Schedule.js';
+
+const StyledContainer = styled.div`
+  padding: 1rem 1rem 93px 1rem;
+`;
+
+function App() {
+  return (
+    <Router>
+      <React.Fragment>
+        <Nav />
+          <StyledContainer className="container">
+            <Route exact path="/" component={HomePage} />
+            <Route path="/fm" render={()=><Schedule channel="fm" />} />
+            <Route path="/digital" render={()=><Schedule channel="digital" />} />
+          </StyledContainer>
+        <NavStream />
+      </React.Fragment>
+    </Router>
+  );
+}
+
+export default App;

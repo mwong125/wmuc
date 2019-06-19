@@ -1,0 +1,45 @@
+
+/*
+  initializes the database
+*/
+var header = require('./header.js');
+var mysql = require('mysql');
+
+/*grab database name and delete field from info before creating database
+  so it doesnt try to connect to wmuc database that isnt there yet
+*/
+var dbInfo = header.sqlInfo;
+var db_name = dbInfo.database;
+delete dbInfo.database;
+
+var wmucTables = header.wmucTables;
+
+var connection = mysql.createConnection(dbInfo).connect(function(err) {
+    if (err) throw err;
+    console.log("Connected to local sql server: @" + dbInfo.host + "\nCreating database: " + db_name);
+});
+
+connection.connect(function(err) {
+    if (err) throw err;
+    let db_query = "create database " + db_name;
+    connection.query(db_query, function (err, result) {
+	if (err) throw err;
+	console.log("Successfuly created db with result: " + result);
+	console.log("Creating tables in wmuc: ");
+	/*non-dj users will have user_bio null*/
+	console.log(" -users: name primary key, pass, pic, bio")
+	console.log(" -dg_shows: name, description, genre, day, start_hour, duration, id primary key");
+	console.log(" -fm_shows: name, description, genre, day, start_hour, duration, id primary key");
+	/*table will contain one row for every dj associated with a particular show*/
+	console.log(" -show_dj: show_id, show_name, dj_name, primary key(show_id, dj_name");
+	let table_query1 = "create table users(name varchar(50) primary key, pass varchar(50), pic varchar(50), bio varchar(50));";
+	let table_query2 = "create table dg_shows(name varchar(50), description varchar(50), genre varchar(50), day varchar(10), start_hour float, duration float, show_id int primary key not null);"
+	let table_query3 = "create table fm_shows(name varchar(50), description varchar(50), genre varchar(50), day varchar(10), start_hour float, duration float, show_id int primary key not null);"
+	let table_query4 = "create table show_dj(show_id int, show_name varchar(50), dj_name varchar(50), primary key(show_id, dj_name));"
+	let table_query = table_query1+table_query2+table_query3+table_query4;
+	connection.query(table_query, function(err, result) {
+	    if (err) throw err;
+	    console.log("Successfully created all tables with result: " + result);
+	});
+    });
+});

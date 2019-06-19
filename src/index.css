@@ -1,0 +1,33 @@
+:root {
+  --background-color: #0f0f0f;
+  --color: #f0f0f0;
+  --wmuc-red: #dc3545;
+  --wmuc-red2: #bd2130;
+  --wmuc-gray: #0a0a0a;
+  --wmuc-gray2: #000000;
+  --on: #28a745;
+  --off: #6c757d;
+}
+
+body {
+  font-family: 'Barlow', var(--font-family-sans-serif);
+  background: var(--background-color);
+  color: var(--color);
+}
+
+a {
+  color: var(--wmuc-red);
+}
+
+a:hover {
+  color: var(--wmuc-red2);
+}
+
+::-moz-selection {
+  background: var(--wmuc-red);
+  color: var(--background-color);
+}
+::selection {
+  background: var(--wmuc-red);
+  color: var(--background-color);
+}
